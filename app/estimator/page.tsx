@@ -7,16 +7,46 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
 import { Upload, Calculator } from "lucide-react"
+import { useToast } from "@/components/ui/use-toast"
 
 export default function EstimatorPage() {
+  const { toast } = useToast()
   const [quantity, setQuantity] = useState("20")
   const [material, setMaterial] = useState("wood")
   const [estimate, setEstimate] = useState<number | null>(null)
+  const [email, setEmail] = useState("")
 
   const calculateEstimate = () => {
     const basePrice = material === "wood" ? 450 : material === "metal" ? 380 : 520
     const total = Number.parseInt(quantity) * basePrice
     setEstimate(total)
+    toast({
+      title: "Estimate generated",
+      description: `Total cost calculated: $${total.toLocaleString()}`,
+    })
+  }
+
+  const handleSendEmail = () => {
+    if (!email) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address.",
+        variant: "destructive",
+      })
+      return
+    }
+    toast({
+      title: "Estimate sent",
+      description: `Formal quote sent to ${email}`,
+    })
+    setEmail("")
+  }
+
+  const handleFileUpload = () => {
+    toast({
+      title: "File upload",
+      description: "File upload functionality would open here.",
+    })
   }
 
   return (
@@ -40,10 +70,12 @@ export default function EstimatorPage() {
             <CardContent>
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-4">
-                  <Button variant="outline" className="w-full max-w-xs bg-transparent">
+                  <Button onClick={handleFileUpload} variant="outline" className="w-full max-w-xs bg-transparent">
                     Upload file
                   </Button>
-                  <Button className="bg-accent text-accent-foreground hover:bg-accent/90">Calculate</Button>
+                  <Button onClick={calculateEstimate} className="bg-accent text-accent-foreground hover:bg-accent/90">
+                    Calculate
+                  </Button>
                 </div>
                 <div className="rounded-lg border-2 border-dashed border-border bg-muted/20 p-8 text-center">
                   <p className="text-sm text-muted-foreground">Drag & Drop a file here</p>
@@ -138,8 +170,16 @@ export default function EstimatorPage() {
             </CardHeader>
             <CardContent>
               <div className="flex gap-4">
-                <Input type="email" placeholder="Your Email" className="max-w-md border-input" />
-                <Button className="bg-accent text-accent-foreground hover:bg-accent/90">Send</Button>
+                <Input
+                  type="email"
+                  placeholder="Your Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="max-w-md border-input"
+                />
+                <Button onClick={handleSendEmail} className="bg-accent text-accent-foreground hover:bg-accent/90">
+                  Send
+                </Button>
               </div>
             </CardContent>
           </Card>

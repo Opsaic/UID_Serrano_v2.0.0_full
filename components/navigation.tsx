@@ -1,18 +1,37 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Home, FileText, Settings, BarChart3 } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { Home, FileText, Settings, BarChart3, LogOut, User, Users, DollarSign, Cable as Cube } from "lucide-react"
+import { useAuth } from "@/components/auth-provider"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
 
 export function Navigation() {
   const pathname = usePathname()
+  const router = useRouter()
+  const { user, signOut } = useAuth()
 
   const links = [
     { href: "/", label: "Dashboard", icon: Home },
+    { href: "/crm", label: "CRM", icon: Users },
     { href: "/estimator", label: "Estimator", icon: FileText },
     { href: "/projects", label: "Projects", icon: BarChart3 },
+    { href: "/accounting", label: "Accounting", icon: DollarSign },
+    { href: "/visualizer", label: "Visualizer", icon: Cube },
     { href: "/settings", label: "Settings", icon: Settings },
   ]
+
+  const handleNewEstimate = () => {
+    router.push("/estimator")
+  }
 
   return (
     <nav className="border-b border-border bg-card">
@@ -41,9 +60,40 @@ export function Navigation() {
               })}
             </div>
           </div>
-          <button className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90">
-            New Estimate
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleNewEstimate}
+              className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90"
+            >
+              New Estimate
+            </button>
+            {user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">{user.user_metadata?.full_name || "User"}</span>
+                      <span className="text-xs text-muted-foreground">{user.email}</span>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push("/settings")}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={signOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
         </div>
       </div>
     </nav>

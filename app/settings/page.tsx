@@ -5,8 +5,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+import { useToast } from "@/components/ui/use-toast"
+import { useState } from "react"
 
 export default function SettingsPage() {
+  const { toast } = useToast()
+  const [emailNotifications, setEmailNotifications] = useState(true)
+  const [projectUpdates, setProjectUpdates] = useState(true)
+
+  const handleSaveCompany = () => {
+    toast({
+      title: "Company information saved",
+      description: "Your business details have been updated successfully.",
+    })
+  }
+
+  const handleSavePricing = () => {
+    toast({
+      title: "Pricing updated",
+      description: "Default material pricing has been saved.",
+    })
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -37,7 +58,9 @@ export default function SettingsPage() {
                 <Label htmlFor="address">Address</Label>
                 <Input id="address" defaultValue="123 Industrial Blvd, Suite 100" />
               </div>
-              <Button className="bg-accent text-accent-foreground hover:bg-accent/90">Save Changes</Button>
+              <Button onClick={handleSaveCompany} className="bg-accent text-accent-foreground hover:bg-accent/90">
+                Save Changes
+              </Button>
             </CardContent>
           </Card>
 
@@ -61,7 +84,9 @@ export default function SettingsPage() {
                   <Input id="composite" type="number" defaultValue="520" />
                 </div>
               </div>
-              <Button className="bg-accent text-accent-foreground hover:bg-accent/90">Update Pricing</Button>
+              <Button onClick={handleSavePricing} className="bg-accent text-accent-foreground hover:bg-accent/90">
+                Update Pricing
+              </Button>
             </CardContent>
           </Card>
 
@@ -76,14 +101,14 @@ export default function SettingsPage() {
                   <div className="font-medium text-foreground">Email Notifications</div>
                   <div className="text-sm text-muted-foreground">Receive email updates for new estimates</div>
                 </div>
-                <input type="checkbox" defaultChecked className="h-4 w-4" />
+                <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
               </div>
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium text-foreground">Project Updates</div>
                   <div className="text-sm text-muted-foreground">Get notified when project status changes</div>
                 </div>
-                <input type="checkbox" defaultChecked className="h-4 w-4" />
+                <Switch checked={projectUpdates} onCheckedChange={setProjectUpdates} />
               </div>
             </CardContent>
           </Card>

@@ -2,13 +2,15 @@ import type React from "react"
 import { Analytics } from "@vercel/analytics/react"
 import { Inter } from "next/font/google"
 import "./globals.css"
+import { Toaster } from "@/components/ui/toaster"
+import { AuthProvider } from "@/components/auth-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "Serrano Door Estimator",
-  description: "Professional door configuration and estimation system",
-    generator: 'v0.app'
+  title: "UID Serrano - Custom Door Management System",
+  description: "Professional CRM, project management, and door configuration system",
+  generator: "v0.app",
 }
 
 export default function RootLayout({
@@ -19,8 +21,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        {children}
+        <AuthProvider>{children}</AuthProvider>
         <Analytics />
+        <Toaster />
       </body>
     </html>
   )
