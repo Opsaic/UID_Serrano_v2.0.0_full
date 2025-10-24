@@ -1,6 +1,7 @@
-import { supabase } from "@/lib/supabaseClient"
+import { createClient } from "@/lib/supabase/client"
 
 export async function signIn(email: string, password: string) {
+  const supabase = createClient()
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -9,10 +10,12 @@ export async function signIn(email: string, password: string) {
 }
 
 export async function signUp(email: string, password: string, fullName: string) {
+  const supabase = createClient()
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
+      emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`,
       data: {
         full_name: fullName,
       },
@@ -22,11 +25,13 @@ export async function signUp(email: string, password: string, fullName: string) 
 }
 
 export async function signOut() {
+  const supabase = createClient()
   const { error } = await supabase.auth.signOut()
   return { error }
 }
 
 export async function getCurrentUser() {
+  const supabase = createClient()
   const {
     data: { user },
     error,
@@ -35,6 +40,9 @@ export async function getCurrentUser() {
 }
 
 export async function resetPassword(email: string) {
-  const { data, error } = await supabase.auth.resetPasswordForEmail(email)
+  const supabase = createClient()
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/auth/reset-password`,
+  })
   return { data, error }
 }
