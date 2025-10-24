@@ -169,7 +169,7 @@ importers:
         specifier: ^8.5
         version: 8.5.0
       tailwindcss:
-        specifier: 4.1.16
+        specifier: ^4.1.9
         version: 4.1.16
       turbo:
         specifier: ^2.5.8

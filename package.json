@@ -65,9 +65,9 @@
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
     "postcss": "^8.5",
-    "tailwindcss": "4.1.16",
+    "tailwindcss": "^4.1.9",
     "turbo": "^2.5.8",
     "typescript": "^5"
   },
-  "packageManager": "npm@10.8.2"
+  "packageManager": "pnpm@10.0.0"
 }
