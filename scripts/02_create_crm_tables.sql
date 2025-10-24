@@ -1,8 +1,16 @@
 -- UID Serrano v2.0.0 - CRM Module Tables
 -- Part 2: CRM (Clients, Leads, Contacts, Opportunities)
 
+-- Drop existing tables to ensure clean slate
+DROP TABLE IF EXISTS quotes CASCADE;
+DROP TABLE IF EXISTS opportunities CASCADE;
+DROP TABLE IF EXISTS leads CASCADE;
+DROP TABLE IF EXISTS contacts CASCADE;
+DROP TABLE IF EXISTS companies CASCADE;
+
 -- Companies/Clients
-CREATE TABLE IF NOT EXISTS companies (
+-- Removed all foreign key constraints, using plain UUID columns
+CREATE TABLE companies (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   industry TEXT,
@@ -16,15 +24,15 @@ CREATE TABLE IF NOT EXISTS companies (
   status TEXT DEFAULT 'active',
   notes TEXT,
   metadata JSONB DEFAULT '{}',
-  created_by UUID REFERENCES users(id),
+  created_by UUID,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Contacts
-CREATE TABLE IF NOT EXISTS contacts (
+CREATE TABLE contacts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
+  company_id UUID,
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
   title TEXT,
@@ -39,7 +47,7 @@ CREATE TABLE IF NOT EXISTS contacts (
 );
 
 -- Leads
-CREATE TABLE IF NOT EXISTS leads (
+CREATE TABLE leads (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   company_name TEXT NOT NULL,
   contact_name TEXT,
@@ -51,7 +59,7 @@ CREATE TABLE IF NOT EXISTS leads (
   estimated_value DECIMAL(12,2),
   probability INTEGER DEFAULT 0,
   expected_close_date DATE,
-  assigned_to UUID REFERENCES users(id),
+  assigned_to UUID,
   notes TEXT,
   metadata JSONB DEFAULT '{}',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -59,17 +67,17 @@ CREATE TABLE IF NOT EXISTS leads (
 );
 
 -- Opportunities
-CREATE TABLE IF NOT EXISTS opportunities (
+CREATE TABLE opportunities (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  company_id UUID REFERENCES companies(id),
-  lead_id UUID REFERENCES leads(id),
+  company_id UUID,
+  lead_id UUID,
   name TEXT NOT NULL,
   description TEXT,
   value DECIMAL(12,2),
   stage TEXT DEFAULT 'qualification',
   probability INTEGER DEFAULT 0,
   expected_close_date DATE,
-  assigned_to UUID REFERENCES users(id),
+  assigned_to UUID,
   status TEXT DEFAULT 'open',
   notes TEXT,
   metadata JSONB DEFAULT '{}',
@@ -78,12 +86,12 @@ CREATE TABLE IF NOT EXISTS opportunities (
 );
 
 -- Quotes
-CREATE TABLE IF NOT EXISTS quotes (
+CREATE TABLE quotes (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   quote_number TEXT UNIQUE NOT NULL,
-  company_id UUID REFERENCES companies(id),
-  opportunity_id UUID REFERENCES opportunities(id),
-  contact_id UUID REFERENCES contacts(id),
+  company_id UUID,
+  opportunity_id UUID,
+  contact_id UUID,
   title TEXT NOT NULL,
   description TEXT,
   subtotal DECIMAL(12,2) DEFAULT 0,
@@ -96,18 +104,18 @@ CREATE TABLE IF NOT EXISTS quotes (
   notes TEXT,
   line_items JSONB DEFAULT '[]',
   metadata JSONB DEFAULT '{}',
-  created_by UUID REFERENCES users(id),
+  created_by UUID,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Create indexes
-CREATE INDEX IF NOT EXISTS idx_companies_name ON companies(name);
-CREATE INDEX IF NOT EXISTS idx_companies_status ON companies(status);
-CREATE INDEX IF NOT EXISTS idx_contacts_company_id ON contacts(company_id);
-CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);
-CREATE INDEX IF NOT EXISTS idx_leads_assigned_to ON leads(assigned_to);
-CREATE INDEX IF NOT EXISTS idx_opportunities_company_id ON opportunities(company_id);
-CREATE INDEX IF NOT EXISTS idx_opportunities_stage ON opportunities(stage);
-CREATE INDEX IF NOT EXISTS idx_quotes_company_id ON quotes(company_id);
-CREATE INDEX IF NOT EXISTS idx_quotes_status ON quotes(status);
+CREATE INDEX idx_companies_name ON companies(name);
+CREATE INDEX idx_companies_status ON companies(status);
+CREATE INDEX idx_contacts_company_id ON contacts(company_id);
+CREATE INDEX idx_leads_status ON leads(status);
+CREATE INDEX idx_leads_assigned_to ON leads(assigned_to);
+CREATE INDEX idx_opportunities_company_id ON opportunities(company_id);
+CREATE INDEX idx_opportunities_stage ON opportunities(stage);
+CREATE INDEX idx_quotes_company_id ON quotes(company_id);
+CREATE INDEX idx_quotes_status ON quotes(status);

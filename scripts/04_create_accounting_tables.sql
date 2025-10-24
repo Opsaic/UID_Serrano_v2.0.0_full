@@ -1,13 +1,21 @@
 -- UID Serrano v2.0.0 - Accounting & Financial Tables
 -- Part 4: Invoices, Payments, Expenses, Budgets
 
+-- Drop existing tables to ensure clean slate
+DROP TABLE IF EXISTS financial_transactions CASCADE;
+DROP TABLE IF EXISTS budgets CASCADE;
+DROP TABLE IF EXISTS expenses CASCADE;
+DROP TABLE IF EXISTS payments CASCADE;
+DROP TABLE IF EXISTS invoices CASCADE;
+
 -- Invoices (enhanced)
-CREATE TABLE IF NOT EXISTS invoices (
+-- Removed all foreign key constraints, using plain UUID columns
+CREATE TABLE invoices (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   invoice_number TEXT UNIQUE NOT NULL,
-  project_id UUID REFERENCES projects(id),
-  company_id UUID REFERENCES companies(id),
-  quote_id UUID REFERENCES quotes(id),
+  project_id UUID,
+  company_id UUID,
+  quote_id UUID,
   issue_date DATE NOT NULL,
   due_date DATE NOT NULL,
   subtotal DECIMAL(12,2) DEFAULT 0,
@@ -21,17 +29,17 @@ CREATE TABLE IF NOT EXISTS invoices (
   notes TEXT,
   line_items JSONB DEFAULT '[]',
   metadata JSONB DEFAULT '{}',
-  created_by UUID REFERENCES users(id),
+  created_by UUID,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Payments
-CREATE TABLE IF NOT EXISTS payments (
+CREATE TABLE payments (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   payment_number TEXT UNIQUE NOT NULL,
-  invoice_id UUID REFERENCES invoices(id),
-  company_id UUID REFERENCES companies(id),
+  invoice_id UUID,
+  company_id UUID,
   amount DECIMAL(12,2) NOT NULL,
   payment_date DATE NOT NULL,
   payment_method TEXT,
@@ -39,15 +47,15 @@ CREATE TABLE IF NOT EXISTS payments (
   notes TEXT,
   status TEXT DEFAULT 'completed',
   metadata JSONB DEFAULT '{}',
-  created_by UUID REFERENCES users(id),
+  created_by UUID,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Expenses
-CREATE TABLE IF NOT EXISTS expenses (
+CREATE TABLE expenses (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   expense_number TEXT UNIQUE NOT NULL,
-  project_id UUID REFERENCES projects(id),
+  project_id UUID,
   category TEXT NOT NULL,
   description TEXT,
   amount DECIMAL(12,2) NOT NULL,
@@ -56,17 +64,17 @@ CREATE TABLE IF NOT EXISTS expenses (
   payment_method TEXT,
   receipt_url TEXT,
   status TEXT DEFAULT 'pending',
-  approved_by UUID REFERENCES users(id),
+  approved_by UUID,
   approved_at TIMESTAMP WITH TIME ZONE,
   metadata JSONB DEFAULT '{}',
-  created_by UUID REFERENCES users(id),
+  created_by UUID,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Budgets
-CREATE TABLE IF NOT EXISTS budgets (
+CREATE TABLE budgets (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  project_id UUID REFERENCES projects(id),
+  project_id UUID,
   category TEXT NOT NULL,
   allocated_amount DECIMAL(12,2) NOT NULL,
   spent_amount DECIMAL(12,2) DEFAULT 0,
@@ -75,13 +83,13 @@ CREATE TABLE IF NOT EXISTS budgets (
   period_end DATE,
   status TEXT DEFAULT 'active',
   metadata JSONB DEFAULT '{}',
-  created_by UUID REFERENCES users(id),
+  created_by UUID,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Financial Transactions
-CREATE TABLE IF NOT EXISTS financial_transactions (
+CREATE TABLE financial_transactions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   transaction_date DATE NOT NULL,
   type TEXT NOT NULL,
@@ -93,18 +101,18 @@ CREATE TABLE IF NOT EXISTS financial_transactions (
   account TEXT,
   status TEXT DEFAULT 'completed',
   metadata JSONB DEFAULT '{}',
-  created_by UUID REFERENCES users(id),
+  created_by UUID,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Create indexes
-CREATE INDEX IF NOT EXISTS idx_invoices_project_id ON invoices(project_id);
-CREATE INDEX IF NOT EXISTS idx_invoices_company_id ON invoices(company_id);
-CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status);
-CREATE INDEX IF NOT EXISTS idx_invoices_due_date ON invoices(due_date);
-CREATE INDEX IF NOT EXISTS idx_payments_invoice_id ON payments(invoice_id);
-CREATE INDEX IF NOT EXISTS idx_payments_payment_date ON payments(payment_date);
-CREATE INDEX IF NOT EXISTS idx_expenses_project_id ON expenses(project_id);
-CREATE INDEX IF NOT EXISTS idx_expenses_status ON expenses(status);
-CREATE INDEX IF NOT EXISTS idx_budgets_project_id ON budgets(project_id);
-CREATE INDEX IF NOT EXISTS idx_financial_transactions_date ON financial_transactions(transaction_date);
+CREATE INDEX idx_invoices_project_id ON invoices(project_id);
+CREATE INDEX idx_invoices_company_id ON invoices(company_id);
+CREATE INDEX idx_invoices_status ON invoices(status);
+CREATE INDEX idx_invoices_due_date ON invoices(due_date);
+CREATE INDEX idx_payments_invoice_id ON payments(invoice_id);
+CREATE INDEX idx_payments_payment_date ON payments(payment_date);
+CREATE INDEX idx_expenses_project_id ON expenses(project_id);
+CREATE INDEX idx_expenses_status ON expenses(status);
+CREATE INDEX idx_budgets_project_id ON budgets(project_id);
+CREATE INDEX idx_financial_transactions_date ON financial_transactions(transaction_date);

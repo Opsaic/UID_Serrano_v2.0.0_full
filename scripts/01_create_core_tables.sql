@@ -1,13 +1,19 @@
 -- UID Serrano v2.0.0 - Core Database Schema
--- Part 1: Core Tables (Users, Roles, Authentication)
+-- Part 1: Core Tables (Profiles, Roles, Departments)
 
 -- Enable necessary extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- Users table (enhanced)
-CREATE TABLE IF NOT EXISTS users (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+-- Drop existing tables to ensure clean slate
+DROP TABLE IF EXISTS audit_log CASCADE;
+DROP TABLE IF EXISTS departments CASCADE;
+DROP TABLE IF EXISTS roles CASCADE;
+DROP TABLE IF EXISTS profiles CASCADE;
+
+-- Profiles table (extends Supabase auth.users)
+CREATE TABLE profiles (
+  id UUID PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
   full_name TEXT,
   role TEXT NOT NULL DEFAULT 'user',
@@ -21,7 +27,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- Roles and permissions
-CREATE TABLE IF NOT EXISTS roles (
+CREATE TABLE roles (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT UNIQUE NOT NULL,
   description TEXT,
@@ -30,20 +36,22 @@ CREATE TABLE IF NOT EXISTS roles (
 );
 
 -- Departments
-CREATE TABLE IF NOT EXISTS departments (
+-- Removed foreign key constraint, using plain UUID
+CREATE TABLE departments (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT UNIQUE NOT NULL,
   description TEXT,
-  manager_id UUID REFERENCES users(id),
+  manager_id UUID,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Audit log (enhanced)
-CREATE TABLE IF NOT EXISTS audit_log (
+-- Removed foreign key constraint, using plain UUID
+CREATE TABLE audit_log (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   action TEXT NOT NULL,
-  user_id UUID REFERENCES users(id),
+  profile_id UUID,
   user_email TEXT,
   resource_type TEXT,
   resource_id UUID,
@@ -53,7 +61,11 @@ CREATE TABLE IF NOT EXISTS audit_log (
 );
 
 -- Create indexes
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
-CREATE INDEX IF NOT EXISTS idx_audit_log_timestamp ON audit_log(timestamp DESC);
-CREATE INDEX IF NOT EXISTS idx_audit_log_user_id ON audit_log(user_id);
+CREATE INDEX idx_profiles_email ON profiles(email);
+CREATE INDEX idx_profiles_role ON profiles(role);
+CREATE INDEX idx_audit_log_timestamp ON audit_log(timestamp DESC);
+CREATE INDEX idx_audit_log_profile_id ON audit_log(profile_id);
+
+-- Note: After running all scripts, manually create your first profile:
+-- INSERT INTO profiles (id, email, full_name, role) 
+-- VALUES (auth.uid(), 'your-email@example.com', 'Your Name', 'admin');

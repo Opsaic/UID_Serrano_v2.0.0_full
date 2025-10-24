@@ -15,14 +15,9 @@ import {
 import { Button } from "@/components/ui/button"
 
 export function Navigation() {
-  console.log("[v0] Navigation component rendering")
-
   const pathname = usePathname()
   const router = useRouter()
   const { user, signOut } = useAuth()
-
-  console.log("[v0] Navigation - current pathname:", pathname)
-  console.log("[v0] Navigation - user:", user ? user.email : "null")
 
   const links = [
     { href: "/", label: "Dashboard", icon: Home },
@@ -35,7 +30,6 @@ export function Navigation() {
   ]
 
   const handleNewEstimate = () => {
-    console.log("[v0] Navigation - New Estimate clicked")
     router.push("/estimator")
   }
 
