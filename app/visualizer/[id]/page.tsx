@@ -3,9 +3,10 @@ import { createClient } from "@/lib/supabase/server"
 import { ModelViewer } from "@/components/visualizer/model-viewer"
 import { ModelDetails } from "@/components/visualizer/model-details"
 
-export default async function ModelViewerPage({ params }: { params: { id: string } }) {
+export default async function ModelViewerPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
-  const { data: model } = await supabase.from("models").select("*").eq("id", params.id).single()
+  const { data: model } = await supabase.from("models").select("*").eq("id", id).single()
 
   if (!model) {
     notFound()

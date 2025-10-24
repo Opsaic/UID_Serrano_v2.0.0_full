@@ -7,9 +7,10 @@ import { ProjectTimeline } from "@/components/projects/project-timeline"
 import { ProjectResources } from "@/components/projects/project-resources"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
+export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
-  const { data: project } = await supabase.from("projects").select("*, companies(name)").eq("id", params.id).single()
+  const { data: project } = await supabase.from("projects").select("*, companies(name)").eq("id", id).single()
 
   if (!project) {
     notFound()
@@ -29,19 +30,19 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
 
         <TabsContent value="tasks" className="mt-6">
           <Suspense fallback={<div>Loading tasks...</div>}>
-            <ProjectTasks projectId={params.id} />
+            <ProjectTasks projectId={id} />
           </Suspense>
         </TabsContent>
 
         <TabsContent value="timeline" className="mt-6">
           <Suspense fallback={<div>Loading timeline...</div>}>
-            <ProjectTimeline projectId={params.id} />
+            <ProjectTimeline projectId={id} />
           </Suspense>
         </TabsContent>
 
         <TabsContent value="resources" className="mt-6">
           <Suspense fallback={<div>Loading resources...</div>}>
-            <ProjectResources projectId={params.id} />
+            <ProjectResources projectId={id} />
           </Suspense>
         </TabsContent>
 
