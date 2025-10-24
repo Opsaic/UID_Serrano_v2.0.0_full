@@ -33,16 +33,13 @@ export async function middleware(request: NextRequest) {
 
   // IMPORTANT: If you remove getSession() and you use server-side rendering
   // with the Supabase client, your users may be randomly logged out.
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  const user = session?.user || null
+  await supabase.auth.getSession()
 
   // Allow public access to marketing pages and auth pages
   const publicPaths = ["/", "/auth"]
   const isPublicPath = publicPaths.some((path) => request.nextUrl.pathname.startsWith(path))
 
-  if (!user && !isPublicPath) {
+  if (!isPublicPath) {
     // no user, redirect to login page
     const url = request.nextUrl.clone()
     url.pathname = "/auth/login"
