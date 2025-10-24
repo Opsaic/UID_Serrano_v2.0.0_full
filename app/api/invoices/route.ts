@@ -12,22 +12,23 @@ export async function GET(req: Request) {
   }
 
   const { searchParams } = new URL(req.url)
+  const companyId = searchParams.get("company_id")
   const projectId = searchParams.get("project_id")
-  const category = searchParams.get("category")
 
   let query = supabase
-    .from("expenses")
+    .from("invoices")
     .select(`
       *,
+      companies:company_id(name),
       projects:project_id(name, project_number)
     `)
-    .order("expense_date", { ascending: false })
+    .order("created_at", { ascending: false })
 
+  if (companyId) {
+    query = query.eq("company_id", companyId)
+  }
   if (projectId) {
     query = query.eq("project_id", projectId)
-  }
-  if (category) {
-    query = query.eq("category", category)
   }
 
   const { data, error } = await query
@@ -50,24 +51,44 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json()
-  const { project_id, category, description, amount, expense_date, vendor, payment_method, receipt_url, notes } = body
+  const {
+    company_id,
+    project_id,
+    quote_id,
+    issue_date,
+    due_date,
+    subtotal,
+    tax_rate,
+    tax_amount,
+    total,
+    amount_paid,
+    amount_due,
+    line_items,
+    notes,
+    terms,
+  } = body
 
-  const expenseNumber = `EXP-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`
+  const invoiceNumber = `INV-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`
 
   const { data, error } = await supabase
-    .from("expenses")
+    .from("invoices")
     .insert({
-      expense_number: expenseNumber,
+      invoice_number: invoiceNumber,
+      company_id,
       project_id,
-      category,
-      description,
-      amount,
-      expense_date,
-      vendor,
-      payment_method,
-      receipt_url,
+      quote_id,
+      issue_date,
+      due_date,
+      subtotal,
+      tax_rate: tax_rate || 0,
+      tax_amount: tax_amount || 0,
+      total,
+      amount_paid: amount_paid || 0,
+      amount_due: amount_due || total,
+      line_items: line_items || [],
       notes,
-      status: "pending",
+      terms,
+      status: "draft",
       created_by: user.id,
     })
     .select()
@@ -94,7 +115,7 @@ export async function PATCH(req: Request) {
   const { id, ...updates } = body
 
   const { data, error } = await supabase
-    .from("expenses")
+    .from("invoices")
     .update({
       ...updates,
       updated_at: new Date().toISOString(),
@@ -127,7 +148,7 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: "ID required" }, { status: 400 })
   }
 
-  const { error } = await supabase.from("expenses").delete().eq("id", id)
+  const { error } = await supabase.from("invoices").delete().eq("id", id)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 })

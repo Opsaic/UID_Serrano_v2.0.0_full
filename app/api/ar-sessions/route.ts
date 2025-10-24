@@ -13,21 +13,22 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url)
   const projectId = searchParams.get("project_id")
-  const category = searchParams.get("category")
+  const modelId = searchParams.get("model_id")
 
   let query = supabase
-    .from("expenses")
+    .from("ar_sessions")
     .select(`
       *,
-      projects:project_id(name, project_number)
+      projects:project_id(name, project_number),
+      models:model_id(name, thumbnail_url)
     `)
-    .order("expense_date", { ascending: false })
+    .order("timestamp", { ascending: false })
 
   if (projectId) {
     query = query.eq("project_id", projectId)
   }
-  if (category) {
-    query = query.eq("category", category)
+  if (modelId) {
+    query = query.eq("model_id", modelId)
   }
 
   const { data, error } = await query
@@ -50,25 +51,20 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json()
-  const { project_id, category, description, amount, expense_date, vendor, payment_method, receipt_url, notes } = body
-
-  const expenseNumber = `EXP-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`
+  const { project_id, model_id, session_type, duration, data: sessionData, screenshots, annotations, metadata } = body
 
   const { data, error } = await supabase
-    .from("expenses")
+    .from("ar_sessions")
     .insert({
-      expense_number: expenseNumber,
       project_id,
-      category,
-      description,
-      amount,
-      expense_date,
-      vendor,
-      payment_method,
-      receipt_url,
-      notes,
-      status: "pending",
-      created_by: user.id,
+      model_id,
+      user_id: user.id,
+      session_type: session_type || "preview",
+      duration,
+      data: sessionData || {},
+      screenshots: screenshots || [],
+      annotations: annotations || [],
+      metadata: metadata || {},
     })
     .select()
     .single()
@@ -93,15 +89,7 @@ export async function PATCH(req: Request) {
   const body = await req.json()
   const { id, ...updates } = body
 
-  const { data, error } = await supabase
-    .from("expenses")
-    .update({
-      ...updates,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", id)
-    .select()
-    .single()
+  const { data, error } = await supabase.from("ar_sessions").update(updates).eq("id", id).select().single()
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 })
@@ -127,7 +115,7 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: "ID required" }, { status: 400 })
   }
 
-  const { error } = await supabase.from("expenses").delete().eq("id", id)
+  const { error } = await supabase.from("ar_sessions").delete().eq("id", id)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 })

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client"
+import { createProfile } from "@/lib/actions/profile"
 
 export async function signIn(email: string, password: string) {
   const supabase = createClient()
@@ -21,6 +22,11 @@ export async function signUp(email: string, password: string, fullName: string) 
       },
     },
   })
+
+  if (data.user && !error) {
+    await createProfile(data.user.id, email, fullName)
+  }
+
   return { data, error }
 }
 

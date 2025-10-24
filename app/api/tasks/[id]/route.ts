@@ -1,11 +1,25 @@
 import { NextResponse } from "next/server"
-import { supabase } from "@/lib/supabaseClient"
+import { createClient } from "@/lib/supabase/server"
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  const body = await req.json()
-  const { status } = body
+  const supabase = await createClient()
 
-  const { data, error } = await supabase.from("tasks").update({ status }).eq("id", params.id).select().single()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  const body = await req.json()
+  const { status, ...updates } = body
+
+  const updateData: any = { ...updates, status, updated_at: new Date().toISOString() }
+  if (status === "completed" && !updates.completed_date) {
+    updateData.completed_date = new Date().toISOString()
+  }
+
+  const { data, error } = await supabase.from("tasks").update(updateData).eq("id", params.id).select().single()
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 })

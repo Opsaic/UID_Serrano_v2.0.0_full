@@ -7,23 +7,60 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
 import { Upload, Calculator } from "lucide-react"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
+
+interface PriceBreakdown {
+  master_pattern_cost: number
+  number_of_molds: number
+  mold_cost_per_mold: number
+  total_mold_cost: number
+  part_cost: number
+  total_parts_cost: number
+  total_cost: number
+}
 
 export default function EstimatorPage() {
   const { toast } = useToast()
   const [quantity, setQuantity] = useState("20")
   const [material, setMaterial] = useState("wood")
-  const [estimate, setEstimate] = useState<number | null>(null)
+  const [breakdown, setBreakdown] = useState<PriceBreakdown | null>(null)
   const [email, setEmail] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [configId, setConfigId] = useState<string | null>(null)
 
-  const calculateEstimate = () => {
-    const basePrice = material === "wood" ? 450 : material === "metal" ? 380 : 520
-    const total = Number.parseInt(quantity) * basePrice
-    setEstimate(total)
-    toast({
-      title: "Estimate generated",
-      description: `Total cost calculated: $${total.toLocaleString()}`,
-    })
+  const calculateEstimate = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch("/api/estimates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          quantity: Number.parseInt(quantity),
+          material,
+          door_type: "custom",
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setBreakdown(data.breakdown)
+        setConfigId(data.estimate.id)
+        toast({
+          title: "Estimate generated",
+          description: `Total cost calculated: $${data.breakdown.total_cost.toLocaleString()}`,
+        })
+      } else {
+        throw new Error("Failed to generate estimate")
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate estimate. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleSendEmail = () => {
@@ -73,8 +110,13 @@ export default function EstimatorPage() {
                   <Button onClick={handleFileUpload} variant="outline" className="w-full max-w-xs bg-transparent">
                     Upload file
                   </Button>
-                  <Button onClick={calculateEstimate} className="bg-accent text-accent-foreground hover:bg-accent/90">
-                    Calculate
+                  <Button
+                    onClick={calculateEstimate}
+                    disabled={loading}
+                    className="bg-accent text-accent-foreground hover:bg-accent/90"
+                  >
+                    <Calculator className="mr-2 h-4 w-4" />
+                    {loading ? "Calculating..." : "Calculate"}
                   </Button>
                 </div>
                 <div className="rounded-lg border-2 border-dashed border-border bg-muted/20 p-8 text-center">
@@ -115,11 +157,14 @@ export default function EstimatorPage() {
                     <option value="wood">Wood (Premium)</option>
                     <option value="metal">Metal (Standard)</option>
                     <option value="composite">Composite (Deluxe)</option>
+                    <option value="fiberglass">Fiberglass</option>
+                    <option value="steel">Steel</option>
                   </select>
                 </div>
               </div>
               <Button
                 onClick={calculateEstimate}
+                disabled={loading}
                 className="mt-6 w-full bg-accent text-accent-foreground hover:bg-accent/90"
               >
                 Generate Estimate
@@ -127,36 +172,41 @@ export default function EstimatorPage() {
             </CardContent>
           </Card>
 
-          {estimate !== null && (
+          {breakdown && (
             <Card className="border-primary">
               <CardHeader>
-                <CardTitle className="text-accent">Pricing Generated: ESTIMATE</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-accent">Pricing Generated: ESTIMATE</CardTitle>
+                  {configId && <span className="text-xs text-muted-foreground">Config ID: {configId.slice(0, 8)}</span>}
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-3">
                   <div className="rounded-lg border border-accent/30 bg-accent/5 p-4">
                     <div className="text-sm text-muted-foreground">Master Pattern Cost</div>
-                    <div className="mt-1 text-2xl font-semibold text-foreground">${(estimate * 0.15).toFixed(0)}</div>
-                  </div>
-                  <div className="rounded-lg border border-accent/30 bg-accent/5 p-4">
-                    <div className="text-sm text-muted-foreground">Number of Molds</div>
                     <div className="mt-1 text-2xl font-semibold text-foreground">
-                      {Math.ceil(Number.parseInt(quantity) / 10)}
+                      ${breakdown.master_pattern_cost.toLocaleString()}
                     </div>
                   </div>
                   <div className="rounded-lg border border-accent/30 bg-accent/5 p-4">
+                    <div className="text-sm text-muted-foreground">Number of Molds</div>
+                    <div className="mt-1 text-2xl font-semibold text-foreground">{breakdown.number_of_molds}</div>
+                  </div>
+                  <div className="rounded-lg border border-accent/30 bg-accent/5 p-4">
                     <div className="text-sm text-muted-foreground">Mold Cost (per mold)</div>
-                    <div className="mt-1 text-2xl font-semibold text-foreground">${(estimate * 0.08).toFixed(0)}</div>
+                    <div className="mt-1 text-2xl font-semibold text-foreground">
+                      ${breakdown.mold_cost_per_mold.toLocaleString()}
+                    </div>
                   </div>
                   <div className="rounded-lg border border-accent/30 bg-accent/5 p-4">
                     <div className="text-sm text-muted-foreground">Part Cost (per part)</div>
                     <div className="mt-1 text-2xl font-semibold text-foreground">
-                      ${(estimate / Number.parseInt(quantity)).toFixed(0)}
+                      ${breakdown.part_cost.toLocaleString()}
                     </div>
                   </div>
                   <div className="col-span-2 rounded-lg border-2 border-accent bg-accent/10 p-6">
                     <div className="text-sm font-medium text-muted-foreground">Total Cost</div>
-                    <div className="mt-2 text-4xl font-bold text-accent">${estimate.toLocaleString()}</div>
+                    <div className="mt-2 text-4xl font-bold text-accent">${breakdown.total_cost.toLocaleString()}</div>
                   </div>
                 </div>
               </CardContent>

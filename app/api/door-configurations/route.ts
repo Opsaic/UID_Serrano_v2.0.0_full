@@ -13,21 +13,23 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url)
   const projectId = searchParams.get("project_id")
-  const category = searchParams.get("category")
+  const quoteId = searchParams.get("quote_id")
 
   let query = supabase
-    .from("expenses")
+    .from("door_configurations")
     .select(`
       *,
-      projects:project_id(name, project_number)
+      projects:project_id(name, project_number),
+      quotes:quote_id(quote_number),
+      models:model_id(name, thumbnail_url)
     `)
-    .order("expense_date", { ascending: false })
+    .order("created_at", { ascending: false })
 
   if (projectId) {
     query = query.eq("project_id", projectId)
   }
-  if (category) {
-    query = query.eq("category", category)
+  if (quoteId) {
+    query = query.eq("quote_id", quoteId)
   }
 
   const { data, error } = await query
@@ -50,24 +52,39 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json()
-  const { project_id, category, description, amount, expense_date, vendor, payment_method, receipt_url, notes } = body
-
-  const expenseNumber = `EXP-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`
+  const {
+    project_id,
+    quote_id,
+    model_id,
+    name,
+    door_type,
+    dimensions,
+    materials,
+    hardware,
+    finish,
+    glass_options,
+    custom_features,
+    price_breakdown,
+    total_price,
+  } = body
 
   const { data, error } = await supabase
-    .from("expenses")
+    .from("door_configurations")
     .insert({
-      expense_number: expenseNumber,
       project_id,
-      category,
-      description,
-      amount,
-      expense_date,
-      vendor,
-      payment_method,
-      receipt_url,
-      notes,
-      status: "pending",
+      quote_id,
+      model_id,
+      name,
+      door_type: door_type || "custom",
+      dimensions,
+      materials: materials || {},
+      hardware: hardware || {},
+      finish: finish || {},
+      glass_options: glass_options || {},
+      custom_features: custom_features || [],
+      price_breakdown: price_breakdown || {},
+      total_price,
+      status: "draft",
       created_by: user.id,
     })
     .select()
@@ -94,7 +111,7 @@ export async function PATCH(req: Request) {
   const { id, ...updates } = body
 
   const { data, error } = await supabase
-    .from("expenses")
+    .from("door_configurations")
     .update({
       ...updates,
       updated_at: new Date().toISOString(),
@@ -127,7 +144,7 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: "ID required" }, { status: 400 })
   }
 
-  const { error } = await supabase.from("expenses").delete().eq("id", id)
+  const { error } = await supabase.from("door_configurations").delete().eq("id", id)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 })

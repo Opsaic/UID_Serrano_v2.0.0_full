@@ -6,13 +6,55 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { useToast } from "@/components/ui/use-toast"
-import { useState } from "react"
+import { useToast } from "@/hooks/use-toast"
+import { useState, useEffect } from "react"
+import { useAuth } from "@/components/auth-provider"
+import { updateProfile } from "@/lib/actions/profile"
 
 export default function SettingsPage() {
   const { toast } = useToast()
+  const { user, profile } = useAuth()
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [projectUpdates, setProjectUpdates] = useState(true)
+  const [fullName, setFullName] = useState("")
+  const [phone, setPhone] = useState("")
+  const [department, setDepartment] = useState("")
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (profile) {
+      setFullName(profile.full_name || "")
+      setPhone(profile.phone || "")
+      setDepartment(profile.department || "")
+    }
+  }, [profile])
+
+  const handleSaveProfile = async () => {
+    if (!user) return
+
+    setLoading(true)
+    const { profile: updatedProfile, error } = await updateProfile(user.id, {
+      full_name: fullName,
+      phone,
+      department,
+    })
+
+    setLoading(false)
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error,
+        variant: "destructive",
+      })
+      return
+    }
+
+    toast({
+      title: "Profile updated",
+      description: "Your profile information has been saved successfully.",
+    })
+  }
 
   const handleSaveCompany = () => {
     toast({
@@ -38,6 +80,62 @@ export default function SettingsPage() {
         </div>
 
         <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>User Profile</CardTitle>
+              <CardDescription>Update your personal information</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <Input
+                    id="fullName"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="John Doe"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" type="email" value={profile?.email || ""} disabled />
+                </div>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+1 (555) 123-4567"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="department">Department</Label>
+                  <Input
+                    id="department"
+                    value={department}
+                    onChange={(e) => setDepartment(e.target.value)}
+                    placeholder="Sales, Engineering, etc."
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Role</Label>
+                <Input value={profile?.role || "user"} disabled />
+              </div>
+              <Button
+                onClick={handleSaveProfile}
+                disabled={loading}
+                className="bg-accent text-accent-foreground hover:bg-accent/90"
+              >
+                {loading ? "Saving..." : "Save Profile"}
+              </Button>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Company Information</CardTitle>

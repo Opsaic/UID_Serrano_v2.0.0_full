@@ -13,21 +13,18 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url)
   const projectId = searchParams.get("project_id")
-  const category = searchParams.get("category")
 
   let query = supabase
-    .from("expenses")
+    .from("tasks")
     .select(`
       *,
-      projects:project_id(name, project_number)
+      projects:project_id(name, project_number),
+      profiles:assigned_to(full_name, email)
     `)
-    .order("expense_date", { ascending: false })
+    .order("created_at", { ascending: false })
 
   if (projectId) {
     query = query.eq("project_id", projectId)
-  }
-  if (category) {
-    query = query.eq("category", category)
   }
 
   const { data, error } = await query
@@ -50,24 +47,34 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json()
-  const { project_id, category, description, amount, expense_date, vendor, payment_method, receipt_url, notes } = body
-
-  const expenseNumber = `EXP-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`
+  const {
+    project_id,
+    phase_id,
+    name,
+    description,
+    type,
+    priority,
+    estimated_hours,
+    start_date,
+    due_date,
+    assigned_to,
+  } = body
 
   const { data, error } = await supabase
-    .from("expenses")
+    .from("tasks")
     .insert({
-      expense_number: expenseNumber,
       project_id,
-      category,
+      phase_id,
+      name,
       description,
-      amount,
-      expense_date,
-      vendor,
-      payment_method,
-      receipt_url,
-      notes,
+      type: type || "task",
       status: "pending",
+      priority: priority || "medium",
+      estimated_hours,
+      actual_hours: 0,
+      start_date,
+      due_date,
+      assigned_to: assigned_to || user.id,
       created_by: user.id,
     })
     .select()
@@ -93,8 +100,13 @@ export async function PATCH(req: Request) {
   const body = await req.json()
   const { id, ...updates } = body
 
+  // If marking as completed, set completed_date
+  if (updates.status === "completed" && !updates.completed_date) {
+    updates.completed_date = new Date().toISOString()
+  }
+
   const { data, error } = await supabase
-    .from("expenses")
+    .from("tasks")
     .update({
       ...updates,
       updated_at: new Date().toISOString(),
@@ -127,7 +139,7 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: "ID required" }, { status: 400 })
   }
 
-  const { error } = await supabase.from("expenses").delete().eq("id", id)
+  const { error } = await supabase.from("tasks").delete().eq("id", id)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 })
