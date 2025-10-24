@@ -3,6 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { FileText, DollarSign, Clock, TrendingUp } from "lucide-react"
 
 export default function DashboardPage() {
+  console.log("[v0] DashboardPage rendering")
+
   const stats = [
     {
       title: "Active Estimates",
@@ -35,6 +37,9 @@ export default function DashboardPage() {
     { id: "EST-002", client: "BuildCo", doors: 18, status: "Approved", amount: "$9,200" },
     { id: "EST-003", client: "Metro Design", doors: 32, status: "In Review", amount: "$16,800" },
   ]
+
+  console.log("[v0] DashboardPage stats count:", stats.length)
+  console.log("[v0] DashboardPage estimates count:", recentEstimates.length)
 
   return (
     <div className="min-h-screen bg-background">
