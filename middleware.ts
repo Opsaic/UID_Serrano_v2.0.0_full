@@ -1,6 +1,5 @@
-import { createServerClient } from "@supabase/ssr"
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+import { createServerClient, type CookieOptions } from "@supabase/ssr"
+import { NextResponse, type NextRequest } from "next/server"
 
 export async function middleware(req: NextRequest) {
   let response = NextResponse.next({
@@ -17,7 +16,7 @@ export async function middleware(req: NextRequest) {
         get(name: string) {
           return req.cookies.get(name)?.value
         },
-        set(name: string, value: string, options: any) {
+        set(name: string, value: string, options: CookieOptions) {
           req.cookies.set({
             name,
             value,
@@ -34,7 +33,7 @@ export async function middleware(req: NextRequest) {
             ...options,
           })
         },
-        remove(name: string, options: any) {
+        remove(name: string, options: CookieOptions) {
           req.cookies.set({
             name,
             value: "",
@@ -59,6 +58,8 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
 
+  await supabase.auth.getUser()
+
   // Protected routes that require authentication
   const protectedPaths = ["/", "/estimator", "/projects", "/settings", "/crm", "/accounting", "/visualizer"]
   const isProtectedPath = protectedPaths.some((path) => req.nextUrl.pathname.startsWith(path))
@@ -79,5 +80,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
 }
