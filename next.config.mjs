@@ -7,7 +7,6 @@ const __dirname = dirname(__filename);
 export default {
   turbopack: { root: join(__dirname) },
   reactStrictMode: true,
-  swcMinify: true,
   eslint: {
     ignoreDuringBuilds: true,
   },
