@@ -2,10 +2,6 @@
   "name": "uid-serrano-v2",
   "version": "2.0.0",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -63,9 +59,9 @@
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
     "postcss": "^8.5",
-    "tailwindcss": "4.1.16",
+    "tailwindcss": "^4.1.9",
     "turbo": "^2.0.0",
     "typescript": "^5"
   },
-  "packageManager": "npm@10.8.2"
+  "packageManager": "pnpm@10.0.0"
 }
