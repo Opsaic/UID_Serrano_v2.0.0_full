@@ -1,8 +1,24 @@
-import { getSession } from "@/lib/auth-server";
-import { redirect } from "next/navigation";
+import type React from "react"
+import type { Metadata } from "next"
+import { Inter } from "next/font/google"
+import "./globals.css"
 
-export default async function RootLayout({ children }) {
-  const session = await getSession();
-  if (!session) redirect("/auth/login");
-  return <>{children}</>;
+const inter = Inter({ subsets: ["latin"] })
+
+export const metadata: Metadata = {
+  title: "UID Serrano v2.0.0",
+  description: "Unified Intelligence Dashboard for Serrano Door Systems",
+    generator: 'v0.app'
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body className={inter.className}>{children}</body>
+    </html>
+  )
 }

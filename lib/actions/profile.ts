@@ -32,7 +32,6 @@ export async function createProfile(userId: string, email: string, fullName: str
     .single()
 
   if (error) {
-    console.error("[v0] Error creating profile:", error)
     return { profile: null, error: error.message }
   }
 
@@ -45,7 +44,6 @@ export async function getProfile(userId: string) {
   const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).single()
 
   if (error) {
-    console.error("[v0] Error fetching profile:", error)
     return { profile: null, error: error.message }
   }
 
@@ -66,7 +64,6 @@ export async function updateProfile(userId: string, updates: Partial<Profile>) {
     .single()
 
   if (error) {
-    console.error("[v0] Error updating profile:", error)
     return { profile: null, error: error.message }
   }
 

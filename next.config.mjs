@@ -1,14 +1,16 @@
-// next.config.mjs – disable ESLint completely
 const nextConfig = {
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
-  typescript: {
-    ignoreBuildErrors: true,
+  images: {
+    unoptimized: true,
   },
   experimental: {
     turbo: true,
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig
