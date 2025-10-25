@@ -12,9 +12,22 @@ export async function ExpensesTable() {
 
   const { data: expenses } = await supabase
     .from("expenses")
-    .select("*, projects(name)")
+    .select("*")
     .order("created_at", { ascending: false })
     .limit(50)
+
+  // Fetch related projects if expenses exist
+  const projectsMap = new Map()
+  if (expenses && expenses.length > 0) {
+    const projectIds = [...new Set(expenses.map((e) => e.project_id).filter(Boolean))]
+    if (projectIds.length > 0) {
+      const { data: projects } = await supabase.from("projects").select("id, name").in("id", projectIds)
+
+      if (projects) {
+        projects.forEach((p) => projectsMap.set(p.id, p))
+      }
+    }
+  }
 
   return (
     <Card>
@@ -43,7 +56,7 @@ export async function ExpensesTable() {
                   <TableCell className="font-medium">{expense.expense_number}</TableCell>
                   <TableCell>{expense.description}</TableCell>
                   <TableCell>{expense.category || "-"}</TableCell>
-                  <TableCell>{expense.projects?.name || "-"}</TableCell>
+                  <TableCell>{expense.project_id ? projectsMap.get(expense.project_id)?.name || "-" : "-"}</TableCell>
                   <TableCell>
                     {expense.expense_date ? format(new Date(expense.expense_date), "MMM d, yyyy") : "-"}
                   </TableCell>

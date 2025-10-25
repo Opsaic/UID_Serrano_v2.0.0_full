@@ -12,9 +12,22 @@ export async function InvoicesTable() {
 
   const { data: invoices } = await supabase
     .from("invoices")
-    .select("*, companies(name)")
+    .select("*")
     .order("created_at", { ascending: false })
     .limit(50)
+
+  // Fetch related companies if invoices exist
+  const companiesMap = new Map()
+  if (invoices && invoices.length > 0) {
+    const companyIds = [...new Set(invoices.map((i) => i.company_id).filter(Boolean))]
+    if (companyIds.length > 0) {
+      const { data: companies } = await supabase.from("companies").select("id, name").in("id", companyIds)
+
+      if (companies) {
+        companies.forEach((c) => companiesMap.set(c.id, c))
+      }
+    }
+  }
 
   return (
     <Card>
@@ -41,7 +54,7 @@ export async function InvoicesTable() {
               {invoices.map((invoice) => (
                 <TableRow key={invoice.id}>
                   <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
-                  <TableCell>{invoice.companies?.name || "-"}</TableCell>
+                  <TableCell>{invoice.company_id ? companiesMap.get(invoice.company_id)?.name || "-" : "-"}</TableCell>
                   <TableCell>
                     {invoice.issue_date ? format(new Date(invoice.issue_date), "MMM d, yyyy") : "-"}
                   </TableCell>
