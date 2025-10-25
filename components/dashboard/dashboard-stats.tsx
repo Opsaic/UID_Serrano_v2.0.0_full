@@ -5,40 +5,96 @@ import { createClient } from "@/lib/supabase/server"
 export async function DashboardStats() {
   const supabase = await createClient()
 
-  const [projectsResult, companiesResult, opportunitiesResult] = await Promise.all([
-    supabase.from("projects").select("id, status", { count: "exact" }),
-    supabase.from("companies").select("id", { count: "exact" }),
-    supabase.from("opportunities").select("value", { count: "exact" }),
+  const now = new Date()
+  const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+  const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString()
+  const firstDayTwoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, 1).toISOString()
+
+  const [
+    projectsThisMonth,
+    projectsLastMonth,
+    companiesThisMonth,
+    companiesLastMonth,
+    opportunitiesThisMonth,
+    opportunitiesLastMonth,
+    paymentsThisMonth,
+    paymentsLastMonth,
+  ] = await Promise.all([
+    supabase.from("projects").select("id", { count: "exact" }).gte("created_at", firstDayThisMonth),
+    supabase
+      .from("projects")
+      .select("id", { count: "exact" })
+      .gte("created_at", firstDayLastMonth)
+      .lt("created_at", firstDayThisMonth),
+    supabase.from("companies").select("id", { count: "exact" }).gte("created_at", firstDayThisMonth),
+    supabase
+      .from("companies")
+      .select("id", { count: "exact" })
+      .gte("created_at", firstDayLastMonth)
+      .lt("created_at", firstDayThisMonth),
+    supabase.from("opportunities").select("id", { count: "exact" }).gte("created_at", firstDayThisMonth),
+    supabase
+      .from("opportunities")
+      .select("id", { count: "exact" })
+      .gte("created_at", firstDayLastMonth)
+      .lt("created_at", firstDayThisMonth),
+    supabase.from("payments").select("amount").gte("payment_date", firstDayThisMonth),
+    supabase
+      .from("payments")
+      .select("amount")
+      .gte("payment_date", firstDayLastMonth)
+      .lt("payment_date", firstDayThisMonth),
   ])
+
+  const revenueThisMonth = paymentsThisMonth.data?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0
+  const revenueLastMonth = paymentsLastMonth.data?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0
+  const revenueChange = revenueLastMonth > 0 ? ((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 100 : 0
+
+  const projectsChange =
+    (projectsLastMonth.count || 0) > 0
+      ? (((projectsThisMonth.count || 0) - (projectsLastMonth.count || 0)) / (projectsLastMonth.count || 1)) * 100
+      : 0
+
+  const companiesChange =
+    (companiesLastMonth.count || 0) > 0
+      ? (((companiesThisMonth.count || 0) - (companiesLastMonth.count || 0)) / (companiesLastMonth.count || 1)) * 100
+      : 0
+
+  const opportunitiesChange =
+    (opportunitiesLastMonth.count || 0) > 0
+      ? (((opportunitiesThisMonth.count || 0) - (opportunitiesLastMonth.count || 0)) /
+          (opportunitiesLastMonth.count || 1)) *
+        100
+      : 0
 
   const stats = [
     {
       title: "Total Revenue",
-      value: "$45,231",
-      change: "+20.1%",
+      value: `$${revenueThisMonth.toLocaleString()}`,
+      change: `${revenueChange >= 0 ? "+" : ""}${revenueChange.toFixed(1)}%`,
       icon: DollarSign,
-      trend: "up",
+      trend: revenueChange >= 0 ? "up" : "down",
     },
     {
       title: "Active Projects",
-      value: projectsResult.count?.toString() || "0",
-      change: "+12.5%",
+      value: (projectsThisMonth.count || 0).toString(),
+      change: `${projectsChange >= 0 ? "+" : ""}${projectsChange.toFixed(1)}%`,
       icon: FolderKanban,
-      trend: "up",
+      trend: projectsChange >= 0 ? "up" : "down",
     },
     {
       title: "Total Clients",
-      value: companiesResult.count?.toString() || "0",
-      change: "+8.2%",
+      value: (companiesThisMonth.count || 0).toString(),
+      change: `${companiesChange >= 0 ? "+" : ""}${companiesChange.toFixed(1)}%`,
       icon: Users,
-      trend: "up",
+      trend: companiesChange >= 0 ? "up" : "down",
     },
     {
       title: "Opportunities",
-      value: opportunitiesResult.count?.toString() || "0",
-      change: "+15.3%",
+      value: (opportunitiesThisMonth.count || 0).toString(),
+      change: `${opportunitiesChange >= 0 ? "+" : ""}${opportunitiesChange.toFixed(1)}%`,
       icon: TrendingUp,
-      trend: "up",
+      trend: opportunitiesChange >= 0 ? "up" : "down",
     },
   ]
 
