@@ -15,7 +15,7 @@ export async function ModelsGrid() {
       {models && models.length > 0 ? (
         models.map((model) => (
           <Card key={model.id} className="overflow-hidden">
-            <div className="aspect-video bg-muted/20 flex items-center justify-center border-b border-border">
+            <div className="aspect-video bg-muted/20 flex items-center justify-center border-b">
               {model.thumbnail_url ? (
                 <img
                   src={model.thumbnail_url || "/placeholder.svg"}

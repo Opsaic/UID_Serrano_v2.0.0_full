@@ -61,7 +61,7 @@ export function DashboardSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="border-b border-border">
+      <SidebarHeader className="border-b">
         <div className="flex items-center gap-2 px-2 py-2">
           <div className="h-8 w-8 rounded-lg bg-accent flex items-center justify-center">
             <Building2 className="h-5 w-5 text-accent-foreground" />
@@ -99,7 +99,7 @@ export function DashboardSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-border">
+      <SidebarFooter className="border-t">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight, Play } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog"
 import { ModelViewer } from "@/components/visualizer/model-viewer"
 
 export function MarketingHero() {
@@ -23,7 +23,7 @@ export function MarketingHero() {
       <div className="relative mx-auto max-w-7xl px-4 py-32 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl text-center">
           {/* Badge */}
-          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium shadow-sm animate-fade-in-up">
+          <div className="mb-8 inline-flex items-center gap-2 rounded-full border bg-card px-4 py-2 text-sm font-medium shadow-sm animate-fade-in-up">
             <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
             <span className="text-muted-foreground">Revolutionizing Custom Door Manufacturing</span>
           </div>
@@ -84,7 +84,7 @@ export function MarketingHero() {
           <div className="relative mx-auto max-w-5xl">
             <button
               onClick={() => setShowDemo(true)}
-              className="w-full aspect-video rounded-2xl bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10 shadow-2xl border border-border overflow-hidden hover:shadow-3xl transition-shadow cursor-pointer group"
+              className="w-full aspect-video rounded-2xl bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10 shadow-2xl border overflow-hidden hover:shadow-3xl transition-shadow cursor-pointer group"
             >
               <div className="flex h-full items-center justify-center">
                 <div className="text-center">
@@ -105,11 +105,11 @@ export function MarketingHero() {
 
       <Dialog open={showDemo} onOpenChange={setShowDemo}>
         <DialogContent className="max-w-4xl">
+          <DialogTitle className="text-2xl font-bold">3D Door Visualization</DialogTitle>
+          <DialogDescription className="text-muted-foreground">
+            Interact with the model using your mouse or touch. Drag to rotate, scroll to zoom, right-click to pan.
+          </DialogDescription>
           <div className="space-y-4">
-            <div>
-              <h3 className="text-2xl font-bold">3D Door Visualization</h3>
-              <p className="text-muted-foreground">Interact with the model using your mouse or touch</p>
-            </div>
             <ModelViewer model={demoModel} />
             <div className="flex justify-between items-center text-sm text-muted-foreground">
               <p>Drag to rotate • Scroll to zoom • Right-click to pan</p>

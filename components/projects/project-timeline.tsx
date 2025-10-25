@@ -21,7 +21,7 @@ export async function ProjectTimeline({ projectId }: { projectId: string }) {
         {phases && phases.length > 0 ? (
           <div className="space-y-6">
             {phases.map((phase, index) => (
-              <div key={phase.id} className="relative pl-8 pb-6 border-l-2 border-border last:border-l-0 last:pb-0">
+              <div key={phase.id} className="relative pl-8 pb-6 border-l-2 border last:border-l-0 last:pb-0">
                 <div className="absolute left-0 top-0 -translate-x-1/2 h-4 w-4 rounded-full bg-accent border-2 border-background" />
                 <div>
                   <div className="flex items-center justify-between mb-2">

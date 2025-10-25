@@ -57,7 +57,7 @@ export function MarketingFeatures() {
             return (
               <div
                 key={feature.title}
-                className="group relative rounded-2xl border border-border bg-card p-8 transition-all hover:shadow-lg hover:border-accent/50"
+                className="group relative rounded-2xl border bg-card p-8 transition-all hover:shadow-lg hover:border-accent/50"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 {/* Icon */}

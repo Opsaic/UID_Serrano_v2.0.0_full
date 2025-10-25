@@ -42,7 +42,7 @@ export function SecuritySettings() {
           <CardDescription>Add an extra layer of security to your account</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-4 p-4 border border-border rounded-lg">
+          <div className="flex items-center gap-4 p-4 border rounded-lg">
             <Shield className="h-8 w-8 text-muted-foreground" />
             <div className="flex-1">
               <p className="font-medium">Two-factor authentication is not enabled</p>
@@ -61,7 +61,7 @@ export function SecuritySettings() {
           <CardDescription>Manage API keys for integrations</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-4 p-4 border border-border rounded-lg">
+          <div className="flex items-center gap-4 p-4 border rounded-lg">
             <Key className="h-8 w-8 text-muted-foreground" />
             <div className="flex-1">
               <p className="font-medium">No API keys generated</p>

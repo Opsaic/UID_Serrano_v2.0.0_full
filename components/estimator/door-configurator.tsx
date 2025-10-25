@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button"
 
 export function DoorConfigurator() {
   const [config, setConfig] = useState({
@@ -17,6 +18,87 @@ export function DoorConfigurator() {
     hardware: "standard",
     glass: "none",
   })
+
+  const [configId, setConfigId] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [priceData, setPriceData] = useState<any>(null)
+
+  useEffect(() => {
+    const fetchPrice = async () => {
+      if (!configId) return
+
+      try {
+        const response = await fetch(`/api/door-configurations/price?id=${configId}`)
+        if (response.ok) {
+          const data = await response.json()
+          setPriceData(data)
+        }
+      } catch (err) {
+        console.error("[v0] Error fetching price:", err)
+      }
+    }
+
+    fetchPrice()
+  }, [configId, config])
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      const response = await fetch("/api/door-configurations", {
+        method: configId ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(configId ? { id: configId, ...config } : config),
+      })
+
+      if (!response.ok) throw new Error("Failed to save configuration")
+
+      const data = await response.json()
+      setConfigId(data.id)
+      alert("Configuration saved successfully!")
+    } catch (err: any) {
+      console.error("[v0] Error saving configuration:", err)
+      alert("Error saving configuration: " + err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleAddToQuote = async () => {
+    if (!configId) {
+      alert("Please save the configuration first")
+      return
+    }
+
+    try {
+      // Create quote from configuration
+      const response = await fetch("/api/quotes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: `Door Configuration - ${config.doorType}`,
+          description: `${config.width}" x ${config.height}" ${config.material} door`,
+          line_items: [
+            {
+              description: "Custom Door Configuration",
+              quantity: 1,
+              unit_price: priceData?.total_price || 0,
+              total_price: priceData?.total_price || 0,
+            },
+          ],
+          subtotal: priceData?.total_price || 0,
+          total: priceData?.total_price || 0,
+          status: "draft",
+        }),
+      })
+
+      if (!response.ok) throw new Error("Failed to create quote")
+
+      alert("Added to quote successfully!")
+    } catch (err: any) {
+      console.error("[v0] Error adding to quote:", err)
+      alert("Error adding to quote: " + err.message)
+    }
+  }
 
   return (
     <Card>
@@ -71,7 +153,7 @@ export function DoorConfigurator() {
               </div>
             </div>
 
-            <div className="aspect-video rounded-lg border border-border bg-muted/20 flex items-center justify-center">
+            <div className="aspect-video rounded-lg border bg-muted/20 flex items-center justify-center">
               <div className="text-center text-muted-foreground">
                 <p className="text-lg font-medium mb-2">Door Preview</p>
                 <p className="text-sm">
@@ -151,6 +233,14 @@ export function DoorConfigurator() {
           </TabsContent>
         </Tabs>
       </CardContent>
+      <CardFooter className="flex gap-2">
+        <Button variant="outline" onClick={handleSave} disabled={saving}>
+          {saving ? "Saving..." : "Save Configuration"}
+        </Button>
+        <Button onClick={handleAddToQuote} disabled={!configId || !priceData}>
+          Add to Quote
+        </Button>
+      </CardFooter>
     </Card>
   )
 }

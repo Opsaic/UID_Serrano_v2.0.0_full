@@ -73,7 +73,7 @@ export function MarketingNav() {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="border-t border-border bg-background md:hidden">
+        <div className="border-t bg-background md:hidden">
           <div className="space-y-1 px-4 pb-3 pt-2">
             {navLinks.map((link) => (
               <Link
