@@ -8,10 +8,6 @@ module.exports = {
     "*.{ts,tsx,mdx}",
     "*.{js,ts,jsx,tsx,mdx}",
   ],
-  future: {
-    removeDeprecatedGapUtilities: true,
-    purgeLayersByDefault: true,
-  },
   theme: {
     extend: {
       colors: {
@@ -48,11 +44,6 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sky: require("tailwindcss/colors").sky,
-        stone: require("tailwindcss/colors").stone,
-        neutral: require("tailwindcss/colors").neutral,
-        gray: require("tailwindcss/colors").gray,
-        slate: require("tailwindcss/colors").slate,
       },
       borderRadius: {
         lg: "var(--radius)",
