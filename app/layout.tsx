@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/react"
 import "./globals.css"
 import "@/lib/suppress-warnings"
+import { ErrorBoundary } from "@/components/error-boundary"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -21,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        {children}
+        <ErrorBoundary>{children}</ErrorBoundary>
         <Analytics />
       </body>
     </html>
