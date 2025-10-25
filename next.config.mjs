@@ -13,6 +13,7 @@ const nextConfig = {
         hostname: '**.supabase.co',
       },
     ],
+    unoptimized: true,
   },
   webpack: (config, { isServer }) => {
     if (!isServer) {
