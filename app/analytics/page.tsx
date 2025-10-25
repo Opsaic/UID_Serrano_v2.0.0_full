@@ -1,3 +1,5 @@
+"use client"
+
 import { RevenueChart } from "@/components/analytics/revenue-chart"
 import { ProjectPerformance } from "@/components/analytics/project-performance"
 import { SalesPipeline } from "@/components/analytics/sales-pipeline"
