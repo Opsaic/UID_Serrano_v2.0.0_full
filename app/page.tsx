@@ -1,10 +1,23 @@
+import { MarketingNav } from "@/components/marketing/nav"
+import { MarketingHero } from "@/components/marketing/hero"
+import { MarketingFeatures } from "@/components/marketing/features"
+import { MarketingProcess } from "@/components/marketing/process"
+import { MarketingShowcase } from "@/components/marketing/showcase"
+import { MarketingTestimonials } from "@/components/marketing/testimonials"
+import { MarketingCTA } from "@/components/marketing/cta"
+import { MarketingFooter } from "@/components/marketing/footer"
+
 export default function HomePage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">UID Serrano v2.0.0</h1>
-        <p className="text-muted-foreground">System is running successfully</p>
-      </div>
+    <div className="min-h-screen">
+      <MarketingNav />
+      <MarketingHero />
+      <MarketingFeatures />
+      <MarketingProcess />
+      <MarketingShowcase />
+      <MarketingTestimonials />
+      <MarketingCTA />
+      <MarketingFooter />
     </div>
   )
 }
