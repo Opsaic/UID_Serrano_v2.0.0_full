@@ -32,17 +32,18 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Public routes that don't require authentication
-  const publicRoutes = ["/auth/login", "/auth/sign-up", "/auth/sign-up-success"]
-  const isPublicRoute = publicRoutes.some((route) => request.nextUrl.pathname.startsWith(route))
+  const publicRoutes = ["/", "/auth/login", "/auth/sign-up", "/auth/sign-up-success"]
+  const isPublicRoute = publicRoutes.some(
+    (route) => request.nextUrl.pathname === route || request.nextUrl.pathname.startsWith(route + "/"),
+  )
 
   // Redirect to login if not authenticated and trying to access protected route
-  if (!user && !isPublicRoute && request.nextUrl.pathname !== "/") {
+  if (!user && !isPublicRoute) {
     return NextResponse.redirect(new URL("/auth/login", request.url))
   }
 
-  // Redirect to dashboard if authenticated and trying to access auth pages
-  if (user && isPublicRoute) {
+  // Redirect to dashboard if authenticated and trying to access auth pages (but not root)
+  if (user && isPublicRoute && request.nextUrl.pathname !== "/") {
     return NextResponse.redirect(new URL("/dashboard", request.url))
   }
 
