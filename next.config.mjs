@@ -1,9 +1,9 @@
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
+  },
+  eslint: {
+    ignoreDuringBuilds: false,
   },
   images: {
     remotePatterns: [
@@ -12,8 +12,8 @@ const nextConfig = {
         hostname: '*.supabase.co',
       },
     ],
-    unoptimized: true,
   },
+  output: 'standalone',
 }
 
 export default nextConfig

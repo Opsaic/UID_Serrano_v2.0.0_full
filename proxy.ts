@@ -9,47 +9,70 @@ export async function proxy(request: NextRequest) {
     },
   })
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
-          response = NextResponse.next({
-            request,
-          })
-          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
+  // Skip auth check for static files and API routes
+  if (
+    request.nextUrl.pathname.startsWith("/_next") ||
+    request.nextUrl.pathname.startsWith("/api") ||
+    request.nextUrl.pathname.includes(".")
+  ) {
+    return response
+  }
+
+  try {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll()
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+            response = NextResponse.next({
+              request,
+            })
+            cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
+          },
         },
       },
-    },
-  )
+    )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-  const publicRoutes = ["/", "/auth/login", "/auth/sign-up", "/auth/sign-up-success"]
-  const isPublicRoute = publicRoutes.some(
-    (route) => request.nextUrl.pathname === route || request.nextUrl.pathname.startsWith(route + "/"),
-  )
+    const publicRoutes = ["/", "/auth/login", "/auth/sign-up", "/auth/sign-up-success"]
+    const isPublicRoute = publicRoutes.includes(request.nextUrl.pathname)
 
-  // Redirect to login if not authenticated and trying to access protected route
-  if (!user && !isPublicRoute) {
-    return NextResponse.redirect(new URL("/auth/login", request.url))
+    // Redirect to login if not authenticated and trying to access protected route
+    if (!user && !isPublicRoute) {
+      const loginUrl = new URL("/auth/login", request.url)
+      loginUrl.searchParams.set("redirect", request.nextUrl.pathname)
+      return NextResponse.redirect(loginUrl)
+    }
+
+    // Redirect to dashboard if authenticated and trying to access auth pages
+    if (user && request.nextUrl.pathname.startsWith("/auth/")) {
+      return NextResponse.redirect(new URL("/dashboard", request.url))
+    }
+
+    return response
+  } catch (error) {
+    console.error("[v0] Proxy error:", error)
+    return response
   }
-
-  // Redirect to dashboard if authenticated and trying to access auth pages (but not root)
-  if (user && isPublicRoute && request.nextUrl.pathname !== "/") {
-    return NextResponse.redirect(new URL("/dashboard", request.url))
-  }
-
-  return response
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public files (images, etc)
+     */
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+  ],
 }
