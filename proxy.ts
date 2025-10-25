@@ -9,9 +9,9 @@ export async function proxy(request: NextRequest) {
     },
   })
 
-  // Skip auth check for static files and API routes
   if (
     request.nextUrl.pathname.startsWith("/_next") ||
+    request.nextUrl.pathname.startsWith("/_vercel") ||
     request.nextUrl.pathname.startsWith("/api") ||
     request.nextUrl.pathname.includes(".")
   ) {
@@ -70,9 +70,10 @@ export const config = {
      * Match all request paths except:
      * - _next/static (static files)
      * - _next/image (image optimization files)
+     * - _vercel/* (Vercel internal routes)
      * - favicon.ico (favicon file)
      * - public files (images, etc)
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|_vercel|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 }
