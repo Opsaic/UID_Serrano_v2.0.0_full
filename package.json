@@ -29,7 +29,6 @@
     "@types/react": "^18.3.12",
     "@vercel/analytics": "latest",
     "ai": "^4.0.0",
-    "autoprefixer": "^10.4.21",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "latest",
@@ -37,22 +36,21 @@
     "next": "^16.0.0",
     "next-themes": "latest",
     "openai": "latest",
-    "postcss": "^8.5.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "shadcn": "3.5.0",
     "tailwind-merge": "^2.5.5",
-    "tailwindcss": "^3.4.17",
-    "tailwindcss-animate": "^1.0.7",
     "tw-animate-css": "latest",
-    "typescript": "^5.6.3",
     "ws": "latest",
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/node": "^22",
     "@types/react-dom": "^19.2.2",
+    "autoprefixer": "^10.4.20",
     "postcss": "^8.5",
+    "tailwindcss": "^3.4.17",
+    "tailwindcss-animate": "^1.0.7",
     "typescript": "^5"
   }
 }
