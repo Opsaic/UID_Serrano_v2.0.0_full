@@ -16,6 +16,9 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const status = searchParams.get("status")
   const industry = searchParams.get("industry")
+  const market_vertical = searchParams.get("market_vertical")
+  const territory = searchParams.get("territory")
+  const account_type = searchParams.get("account_type")
 
   let query = supabase.from("companies").select("*").order("name", { ascending: true })
 
@@ -24,6 +27,15 @@ export async function GET(req: Request) {
   }
   if (industry) {
     query = query.eq("industry", industry)
+  }
+  if (market_vertical) {
+    query = query.eq("market_vertical", market_vertical)
+  }
+  if (territory) {
+    query = query.eq("territory", territory)
+  }
+  if (account_type) {
+    query = query.eq("account_type", account_type)
   }
 
   const { data, error } = await query
@@ -48,7 +60,23 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json()
-  const { name, email, phone, website, industry, address, tax_id, credit_limit, payment_terms, notes } = body
+  const {
+    name,
+    email,
+    phone,
+    website,
+    industry,
+    address,
+    tax_id,
+    credit_limit,
+    payment_terms,
+    notes,
+    market_vertical,
+    account_type,
+    territory,
+    preferred_pricing_tier,
+    annual_revenue,
+  } = body
 
   const { data, error } = await supabase
     .from("companies")
@@ -65,6 +93,11 @@ export async function POST(req: Request) {
       notes,
       status: "active",
       created_by: user.id,
+      market_vertical,
+      account_type: account_type || "standard",
+      territory: territory || "National",
+      preferred_pricing_tier: preferred_pricing_tier || "Standard",
+      annual_revenue,
     })
     .select()
     .single()

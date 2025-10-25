@@ -27,9 +27,11 @@ export async function CompaniesTable() {
             <TableHeader>
               <TableRow>
                 <TableHead>Company Name</TableHead>
+                <TableHead>Market Vertical</TableHead>
+                <TableHead>Territory</TableHead>
+                <TableHead>Account Type</TableHead>
                 <TableHead>Industry</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -38,9 +40,13 @@ export async function CompaniesTable() {
               {companies.map((company) => (
                 <TableRow key={company.id}>
                   <TableCell className="font-medium">{company.name}</TableCell>
+                  <TableCell>{company.market_vertical || "-"}</TableCell>
+                  <TableCell>{company.territory || "-"}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{company.account_type || "standard"}</Badge>
+                  </TableCell>
                   <TableCell>{company.industry || "-"}</TableCell>
                   <TableCell>{company.email || "-"}</TableCell>
-                  <TableCell>{company.phone || "-"}</TableCell>
                   <TableCell>
                     <Badge variant={company.status === "active" ? "default" : "secondary"}>{company.status}</Badge>
                   </TableCell>
