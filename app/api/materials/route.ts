@@ -1,18 +1,5 @@
-import { createServerClient } from "@supabase/ssr"
-import { cookies } from "next/headers"
+import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
-
-async function createClient() {
-  const cookieStore = await cookies()
-
-  return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
-    cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value
-      },
-    },
-  })
-}
 
 export async function GET(req: Request) {
   try {
@@ -32,6 +19,86 @@ export async function GET(req: Request) {
     return NextResponse.json(data, { status: 200 })
   } catch (err: any) {
     console.error("[v0] GET /materials error:", err.message)
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const body = await req.json()
+
+    const { data, error } = await supabase
+      .from("materials_library")
+      .insert([{ ...body, status: "active" }])
+      .select()
+      .single()
+
+    if (error) throw error
+    return NextResponse.json(data, { status: 201 })
+  } catch (err: any) {
+    console.error("[v0] POST /materials error:", err.message)
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const body = await req.json()
+    const { id, ...updates } = body
+
+    const { data, error } = await supabase.from("materials_library").update(updates).eq("id", id).select().single()
+
+    if (error) throw error
+    return NextResponse.json(data, { status: 200 })
+  } catch (err: any) {
+    console.error("[v0] PATCH /materials error:", err.message)
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(req.url)
+    const id = searchParams.get("id")
+
+    if (!id) {
+      return NextResponse.json({ error: "Material ID required" }, { status: 400 })
+    }
+
+    // Soft delete by setting status to inactive
+    const { error } = await supabase.from("materials_library").update({ status: "inactive" }).eq("id", id)
+
+    if (error) throw error
+    return NextResponse.json({ success: true }, { status: 200 })
+  } catch (err: any) {
+    console.error("[v0] DELETE /materials error:", err.message)
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }

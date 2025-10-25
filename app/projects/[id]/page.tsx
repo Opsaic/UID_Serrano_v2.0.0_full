@@ -4,8 +4,10 @@ import { createClient } from "@/lib/supabase/server"
 import { ProjectHeader } from "@/components/projects/project-header"
 import { ProjectTasks } from "@/components/projects/project-tasks"
 import { ProjectTimeline } from "@/components/projects/project-timeline"
-import { ProjectResources } from "@/components/projects/project-resources"
 import { ProjectDocuments } from "@/components/projects/project-documents"
+import { ProjectPhasesList } from "@/components/projects/project-phases-list"
+import { ProjectBudgetOverview } from "@/components/projects/project-budget-overview"
+import { ProjectResourcesTable } from "@/components/projects/project-resources-table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -24,8 +26,10 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       <Tabs defaultValue="tasks" className="w-full">
         <TabsList>
           <TabsTrigger value="tasks">Tasks</TabsTrigger>
-          <TabsTrigger value="timeline">Timeline</TabsTrigger>
+          <TabsTrigger value="phases">Phases</TabsTrigger>
+          <TabsTrigger value="budget">Budget</TabsTrigger>
           <TabsTrigger value="resources">Resources</TabsTrigger>
+          <TabsTrigger value="timeline">Timeline</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
         </TabsList>
 
@@ -35,15 +39,21 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           </Suspense>
         </TabsContent>
 
-        <TabsContent value="timeline" className="mt-6">
-          <Suspense fallback={<div>Loading timeline...</div>}>
-            <ProjectTimeline projectId={id} />
-          </Suspense>
+        <TabsContent value="phases" className="mt-6">
+          <ProjectPhasesList projectId={id} />
+        </TabsContent>
+
+        <TabsContent value="budget" className="mt-6">
+          <ProjectBudgetOverview projectId={id} />
         </TabsContent>
 
         <TabsContent value="resources" className="mt-6">
-          <Suspense fallback={<div>Loading resources...</div>}>
-            <ProjectResources projectId={id} />
+          <ProjectResourcesTable projectId={id} />
+        </TabsContent>
+
+        <TabsContent value="timeline" className="mt-6">
+          <Suspense fallback={<div>Loading timeline...</div>}>
+            <ProjectTimeline projectId={id} />
           </Suspense>
         </TabsContent>
 

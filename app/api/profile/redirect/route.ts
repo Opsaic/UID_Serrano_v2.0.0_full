@@ -9,7 +9,7 @@ export async function GET(request: Request) {
       return new NextResponse(null, { status: 204 })
     }
 
-    const supabase = createServerClient()
+    const supabase = await createServerClient()
 
     // Get the current user
     const {
