@@ -13,6 +13,7 @@ import {
   LogOut,
   Building2,
   FileText,
+  BarChart3,
 } from "lucide-react"
 import {
   Sidebar,
@@ -31,7 +32,10 @@ import { useAuth } from "@/components/auth-provider"
 const navigation = [
   {
     title: "Main",
-    items: [{ name: "Dashboard", href: "/dashboard", icon: LayoutDashboard }],
+    items: [
+      { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { name: "Analytics", href: "/analytics", icon: BarChart3 },
+    ],
   },
   {
     title: "Business",
@@ -64,7 +68,7 @@ export function DashboardSidebar() {
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-semibold">UID Serrano</span>
-            <span className="text-xs text-muted-foreground">v2.0.0</span>
+            <span className="text-xs text-muted-foreground">v6.0.0</span>
           </div>
         </div>
       </SidebarHeader>
@@ -77,7 +81,7 @@ export function DashboardSidebar() {
               <SidebarMenu>
                 {section.items.map((item) => {
                   const Icon = item.icon
-                  const isActive = pathname === item.href
+                  const isActive = pathname === item.href || pathname?.startsWith(item.href + "/")
                   return (
                     <SidebarMenuItem key={item.name}>
                       <SidebarMenuButton asChild isActive={isActive}>
@@ -112,7 +116,9 @@ export function DashboardSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-        {profile && <div className="px-2 py-2 text-xs text-muted-foreground">{profile.full_name || profile.email}</div>}
+        {profile && (
+          <div className="px-2 py-2 text-xs text-muted-foreground truncate">{profile.full_name || profile.email}</div>
+        )}
       </SidebarFooter>
     </Sidebar>
   )

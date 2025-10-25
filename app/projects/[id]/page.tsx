@@ -5,6 +5,7 @@ import { ProjectHeader } from "@/components/projects/project-header"
 import { ProjectTasks } from "@/components/projects/project-tasks"
 import { ProjectTimeline } from "@/components/projects/project-timeline"
 import { ProjectResources } from "@/components/projects/project-resources"
+import { ProjectDocuments } from "@/components/projects/project-documents"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -47,7 +48,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         </TabsContent>
 
         <TabsContent value="documents" className="mt-6">
-          <div className="text-center py-12 text-muted-foreground">Documents coming soon</div>
+          <ProjectDocuments projectId={id} />
         </TabsContent>
       </Tabs>
     </div>

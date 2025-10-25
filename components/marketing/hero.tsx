@@ -3,8 +3,18 @@
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Play } from "lucide-react"
 import Link from "next/link"
+import { useState } from "react"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { ModelViewer } from "@/components/visualizer/model-viewer"
 
 export function MarketingHero() {
+  const [showDemo, setShowDemo] = useState(false)
+
+  const demoModel = {
+    src: "/models/sample-door.glb", // This would be a real model file
+    name: "Custom Entry Door",
+  }
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-background via-background to-muted/20">
       {/* Background Pattern */}
@@ -47,12 +57,10 @@ export function MarketingHero() {
               size="lg"
               variant="outline"
               className="group h-12 px-8 text-base font-medium bg-transparent"
-              asChild
+              onClick={() => setShowDemo(true)}
             >
-              <Link href="#showcase">
-                <Play className="mr-2 h-4 w-4" />
-                Watch Demo
-              </Link>
+              <Play className="mr-2 h-4 w-4" />
+              Watch Demo
             </Button>
           </div>
 
@@ -74,22 +82,44 @@ export function MarketingHero() {
         {/* Hero Image/Visual */}
         <div className="mt-20 animate-scale-in">
           <div className="relative mx-auto max-w-5xl">
-            <div className="aspect-video rounded-2xl bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10 shadow-2xl border border-border overflow-hidden">
+            <button
+              onClick={() => setShowDemo(true)}
+              className="w-full aspect-video rounded-2xl bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10 shadow-2xl border border-border overflow-hidden hover:shadow-3xl transition-shadow cursor-pointer group"
+            >
               <div className="flex h-full items-center justify-center">
                 <div className="text-center">
-                  <div className="mx-auto h-24 w-24 rounded-full bg-accent/20 flex items-center justify-center mb-4">
+                  <div className="mx-auto h-24 w-24 rounded-full bg-accent/20 flex items-center justify-center mb-4 group-hover:bg-accent/30 transition-colors">
                     <Play className="h-12 w-12 text-accent" />
                   </div>
-                  <p className="text-muted-foreground">3D Door Visualization Demo</p>
+                  <p className="text-muted-foreground font-medium">Click to View 3D Door Visualization</p>
+                  <p className="text-sm text-muted-foreground mt-1">Interactive AR-powered preview</p>
                 </div>
               </div>
-            </div>
+            </button>
             {/* Floating Elements */}
             <div className="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-accent/20 blur-3xl" />
             <div className="absolute -bottom-4 -left-4 h-32 w-32 rounded-full bg-primary/20 blur-3xl" />
           </div>
         </div>
       </div>
+
+      <Dialog open={showDemo} onOpenChange={setShowDemo}>
+        <DialogContent className="max-w-4xl">
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-2xl font-bold">3D Door Visualization</h3>
+              <p className="text-muted-foreground">Interact with the model using your mouse or touch</p>
+            </div>
+            <ModelViewer model={demoModel} />
+            <div className="flex justify-between items-center text-sm text-muted-foreground">
+              <p>Drag to rotate • Scroll to zoom • Right-click to pan</p>
+              <Button variant="outline" asChild>
+                <Link href="/visualizer">Open Full Visualizer</Link>
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   )
 }
