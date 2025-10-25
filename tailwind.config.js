@@ -48,12 +48,6 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        lightBlue: require("tailwindcss/colors").sky,
-        warmGray: require("tailwindcss/colors").stone,
-        trueGray: require("tailwindcss/colors").neutral,
-        coolGray: require("tailwindcss/colors").gray,
-        blueGray: require("tailwindcss/colors").slate,
-        // New color names
         sky: require("tailwindcss/colors").sky,
         stone: require("tailwindcss/colors").stone,
         neutral: require("tailwindcss/colors").neutral,
